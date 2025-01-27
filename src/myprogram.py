@@ -69,7 +69,7 @@ if __name__ == '__main__':
     parser.add_argument('--test_output', help='path to write test predictions', default='pred.txt')
     args = parser.parse_args()
 
-    random.seed(0)
+    random.seed(447)
 
     if args.mode == 'train':
         if not os.path.isdir(args.work_dir):
