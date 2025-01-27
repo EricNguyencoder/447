@@ -15,3 +15,14 @@ https://huggingface.co/apple/OpenELM-450M
 Qwen 2.5B:
 https://huggingface.co/Qwen/Qwen2.5-0.5B 
 fine tune with unsloth: https://colab.research.google.com/drive/1Kose-ucXO1IBaZq5BvbwWieuubP7hxvQ?usp=sharing 
+
+
+
+
+Potential models that we could use:
+- https://huggingface.co/google-bert/bert-base-multilingual-cased
+- https://huggingface.co/docs/transformers/en/model_doc/xlm-roberta
+- https://huggingface.co/docs/transformers/en/model_doc/byt5
+
+If we are using subtitles to train
+- https://www.opensubtitles.org/en/search/subs
