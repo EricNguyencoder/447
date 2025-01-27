@@ -1,8 +1,8 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model_checkpoint = "PATH TO MODEL"
-output_path = "PATH TO OUTPUT"
+model_checkpoint = f"./work/{model_name}-ft"
+output_path = "./output/preds.txt"
 
 tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
 model = AutoModelForCausalLM.from_pretrained(model_checkpoint)

@@ -5,7 +5,7 @@ from peft import LoraConfig, get_peft_model # used for lora fine tuning
 
 # starts from scratch right now
 model_name = "name"
-output_path = "PATH TO OUTPUT"
+output_path = f"./work/{model_name}-ft"
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name)
