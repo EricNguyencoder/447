@@ -25,6 +25,7 @@ deactive the venv with deactivate
 Potential models that we could use:
 - https://huggingface.co/google-bert/bert-base-multilingual-cased
 - https://huggingface.co/docs/transformers/en/model_doc/xlm-roberta
+- I think the one above is a better transformer, than the one below. 
 - https://huggingface.co/docs/transformers/en/model_doc/byt5
 
 If we are using subtitles to train
