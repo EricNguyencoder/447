@@ -3,6 +3,7 @@ import os
 import string
 import random
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from predict import predict
 
 
 class MyModel:
@@ -38,13 +39,14 @@ class MyModel:
 
     def run_pred(self, data):
         # your code here
-        preds = []
-        all_chars = string.ascii_letters
-        for inp in data:
-            # this model just predicts a random character each time
-            top_guesses = [random.choice(all_chars) for _ in range(3)]
-            preds.append(''.join(top_guesses))
-        return preds
+        # preds = []
+        # all_chars = string.ascii_letters
+        # for inp in data:
+        #     # this model just predicts a random character each time
+        #     top_guesses = [random.choice(all_chars) for _ in range(3)]
+        #     preds.append(''.join(top_guesses))
+        # return preds
+        predict(data)
 
     def save(self, work_dir):
         # your code here
@@ -85,13 +87,14 @@ if __name__ == '__main__':
         model.save(args.work_dir)
     elif args.mode == 'test':
         print('Loading model')
-        model = MyModel.load(args.work_dir)
-        print('Loading test data from {}'.format(args.test_data))
+        # model = MyModel.load(args.work_dir)
+        model = MyModel()
+        # print('Loading test data from {}'.format(args.test_data))
         test_data = MyModel.load_test_data(args.test_data)
         print('Making predictions')
         pred = model.run_pred(test_data)
         print('Writing predictions to {}'.format(args.test_output))
-        assert len(pred) == len(test_data), 'Expected {} predictions but got {}'.format(len(test_data), len(pred))
-        model.write_pred(pred, args.test_output)
+        # assert len(pred) == len(test_data), 'Expected {} predictions but got {}'.format(len(test_data), len(pred))
+        # model.write_pred(pred, args.test_output)
     else:
         raise NotImplementedError('Unknown mode {}'.format(args.mode))

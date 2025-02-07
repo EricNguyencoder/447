@@ -3,5 +3,5 @@ work/
 output/
 submit/
 submit.zip
-venv/
-.venv/
+myenv/
+.myenv/
