@@ -3,7 +3,7 @@ from torch.distributions.categorical import Categorical
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 model_checkpoint = f"./work/model.checkpoint"
-output_path = "./output/preds.txt"
+output_path = "./output/pred.txt"
 
 def predict(pred_data):
     tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)

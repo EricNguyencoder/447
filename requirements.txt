@@ -1,6 +1,2 @@
-transformers 
-peft 
-datasets 
-accelerate 
+ peft 
 bitsandbytes
-datasets
