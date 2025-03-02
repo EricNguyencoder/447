@@ -42,7 +42,7 @@ def train(tokenizer, model, dataset):
         output_dir=output_path,  # Output directory
         per_device_train_batch_size=4,  # Batch size per device
         gradient_accumulation_steps=4,  # Gradient accumulation steps
-        num_train_epochs=3,  # Number of training epochs
+        num_train_epochs=200,  # Number of training epochs
         learning_rate=2e-4,  # Learning rate
         fp16=True,  # Use mixed precision (if supported)
         save_steps=500,  # Save checkpoint every 500 steps
