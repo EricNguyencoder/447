@@ -1,72 +1,128 @@
 import torch
-from transformers import AutoModelForCausalLM, Trainer, TrainingArguments, DataCollatorForLanguageModeling, AutoTokenizer
-from datasets import load_dataset, Dataset
-from peft import LoraConfig, get_peft_model # used for lora fine tuning
+from transformers import RobertaTokenizer, RobertaForMaskedLM
+from transformers import Trainer, TrainingArguments, DataCollatorForLanguageModeling
+from datasets import Dataset
+import os
 
-# starts from scratch right now
-def train(tokenizer, model, dataset):
-    print("in train")
-    model_name = "name"
-    output_path = f"./work/model.checkpoint"
-
-    # 
-    print("tokenizing dataset")
-    tokenized_train = tokenizer(dataset, padding=True, truncation=True, return_tensors="pt")
-
-    # Convert tokenized data into Dataset format
-    train_dataset = Dataset.from_dict({
-        "input_ids": tokenized_train["input_ids"],
-        "attention_mask": tokenized_train["attention_mask"],
-    })
-
-
-    # Define LoRA configuration
-    lora_config = LoraConfig(
-        r=8,  # increase to add more precision, -> but slow training 
-        lora_alpha=32,
-        target_modules=["query", "value"],
-        lora_dropout=0.1,  
-        bias="none",  
-        task_type="CAUSAL_LM"  
-    )
-
+def train(tokenizer=None, model=None, dataset=None):
+    """
+    Fine-tune RoBERTa for masked language modeling to improve character prediction.
+    
+    Args:
+        tokenizer: The tokenizer to use (will load RobertaTokenizer if None)
+        model: The model to fine-tune (will load RobertaForMaskedLM if None)
+        dataset: List of text samples to train on
+    
+    Returns:
+        None (saves model to disk)
+    """
+    print("Starting RoBERTa fine-tuning for character prediction")
+    output_path = "./work/model.checkpoint"
+    
+    # Create output directory if it doesn't exist
+    os.makedirs(output_path, exist_ok=True)
+    
+    # Initialize tokenizer and model if not provided
+    if tokenizer is None:
+        print("Loading RoBERTa tokenizer")
+        tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
+    
+    if model is None:
+        print("Loading RoBERTa model")
+        model = RobertaForMaskedLM.from_pretrained("roberta-base")
+    
+    # Load dataset if not provided
+    if dataset is None:
+        try:
+            print("Loading training data from ./work/train_data.txt")
+            dataset = []
+            with open("./work/train_data.txt", "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        dataset.append(line)
+        except Exception as e:
+            print(f"Error loading training data: {e}")
+            return
+    
+    if not dataset:
+        print("Error: No data available for training")
+        return
+    
+    print(f"Training on {len(dataset)} sentences")
+    
+    # Tokenize dataset for MLM training
+    print("Tokenizing dataset")
+    tokenized_texts = []
+    
+    for text in dataset:
+        # Process each text for masked language modeling
+        if text:
+            try:
+                # Tokenize with truncation to prevent excessively long sequences
+                encoded = tokenizer(text, 
+                                  truncation=True, 
+                                  max_length=128,
+                                  padding="max_length",
+                                  return_tensors="pt")
+                
+                tokenized_texts.append({
+                    "input_ids": encoded["input_ids"][0],
+                    "attention_mask": encoded["attention_mask"][0]
+                })
+            except Exception as e:
+                print(f"Error tokenizing text: {e}")
+    
+    if not tokenized_texts:
+        print("Error: No texts could be tokenized")
+        return
+    
+    print(f"Created dataset with {len(tokenized_texts)} samples")
+    
+    # Create dataset object
+    train_dataset = Dataset.from_list(tokenized_texts)
+    
+    # Configure data collator for masked language modeling
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
-        mlm=False  # No Masked LM, since this is causal LM
+        mlm=True,               # Use masked language modeling
+        mlm_probability=0.15     # Standard masking probability
     )
-
-    # Apply LoRA to the model
-    model = get_peft_model(model, lora_config)
-
+    
+    # Set up training arguments
     training_args = TrainingArguments(
-        output_dir=output_path,  # Output directory
-        per_device_train_batch_size=4,  # Batch size per device
-        gradient_accumulation_steps=4,  # Gradient accumulation steps
-        num_train_epochs=200,  # Number of training epochs
-        learning_rate=2e-4,  # Learning rate
-        fp16=True,  # Use mixed precision (if supported)
-        save_steps=500,  # Save checkpoint every 500 steps
-        save_total_limit=2,  # Keep only the last 2 checkpoints
-        logging_dir="./logs",  # Directory for logs
-        logging_steps=100,  # Log every 100 steps
-        evaluation_strategy="no",  # Evaluate every `eval_steps`
+        output_dir=output_path,
+        overwrite_output_dir=True,
+        per_device_train_batch_size=8,
+        gradient_accumulation_steps=2,
+        learning_rate=5e-5,
+        num_train_epochs=1,      # Adjust as needed
+        save_steps=500,
+        save_total_limit=2,
+        logging_steps=100,
+        fp16=torch.cuda.is_available(),  # Use mixed precision if GPU available
+        report_to="none"         # Disable reporting to external services
     )
-
+    
+    # Initialize trainer
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
-        tokenizer=tokenizer,
         data_collator=data_collator,
+        tokenizer=tokenizer
     )
-    print("starting train")
-
+    
+    # Start training
+    print("Starting training")
     trainer.train()
-
+    
+    # Save the model
+    print(f"Saving model to {output_path}")
     model.save_pretrained(output_path)
     tokenizer.save_pretrained(output_path)
+    print("Training completed")
 
-tokenizer = AutoTokenizer.from_pretrained('xlm-roberta-base')
-model = AutoModelForCausalLM.from_pretrained("xlm-roberta-base")
-
-train(tokenizer, model, dataset)
+# Run this if the script is executed directly
+if __name__ == "__main__":
+    train()
