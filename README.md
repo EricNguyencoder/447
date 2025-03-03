@@ -13,7 +13,7 @@ openELM:
 https://huggingface.co/apple/OpenELM-450M 
 
 Qwen 2.5B:
-https://huggingface.co/Qwen/Qwen2.5-0.5B 
+https://huggingface.co/Qwen/Qwen2.5-0.5B - this didn't output words
 fine tune with unsloth: https://colab.research.google.com/drive/1Kose-ucXO1IBaZq5BvbwWieuubP7hxvQ?usp=sharing 
 
 activate the venv with "source ./venv/bin/activate"
